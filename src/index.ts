@@ -1,32 +1,63 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
+import {Hono } from 'hono';
+import {keyword} from 'color-convert'
+import { KEYWORD } from 'color-convert/conversions';
 
-export interface Env {
-	// Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
-	// MY_KV_NAMESPACE: KVNamespace;
-	//
-	// Example binding to Durable Object. Learn more at https://developers.cloudflare.com/workers/runtime-apis/durable-objects/
-	// MY_DURABLE_OBJECT: DurableObjectNamespace;
-	//
-	// Example binding to R2. Learn more at https://developers.cloudflare.com/workers/runtime-apis/r2/
-	// MY_BUCKET: R2Bucket;
-	//
-	// Example binding to a Service. Learn more at https://developers.cloudflare.com/workers/runtime-apis/service-bindings/
-	// MY_SERVICE: Fetcher;
-	//
-	// Example binding to a Queue. Learn more at https://developers.cloudflare.com/queues/javascript-apis/
-	// MY_QUEUE: Queue;
-}
+const app = new Hono();
 
-export default {
-	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-		return new Response('Hello World!');
-	},
-};
+app.get("/",(ctx)=>{
+	return ctx.text(
+		`This is a Color Convert API, You can use the following color formats:
+1. rgb
+2. hsl
+3. hsv
+4. cmyk
+5. hex
+
+To use the API, use the following URL format:
+https://colorconvert.anshdeepsingh.com/colorformat/colorname`
+	);
+})
+
+app.get("/:colorformat/:colorname",(ctx)=>{
+	const colorName: KEYWORD = ctx.req.param("colorname") as KEYWORD;
+	const colorformat: string = ctx.req.param("colorformat") as string;
+
+	if(colorformat === "rgb"){
+		const rgb = keyword.rgb(colorName);
+		return ctx.json({
+			rgb
+		})
+	}
+	else if(colorformat === "hsl"){
+		const hsl = keyword.hsl(colorName);
+		return ctx.json({
+			hsl
+		})
+	}
+	else if(colorformat === "hsv"){
+		const hsv = keyword.hsv(colorName);
+		return ctx.json({
+			hsv
+		})
+	}
+	else if(colorformat === "cmyk"){
+		const cmyk = keyword.cmyk(colorName);
+		return ctx.json({
+			cmyk
+		})
+	}
+	else if(colorformat === "hex"){
+		const hex = keyword.hex(colorName);
+		return ctx.json({
+			hex
+		})
+	}
+	else{
+		return ctx.text(
+			`Invalid Color Format`
+		);
+	}
+
+})
+
+export default app;
